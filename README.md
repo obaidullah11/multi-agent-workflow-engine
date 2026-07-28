@@ -1,6 +1,6 @@
 # Multi-Agent AI Workflow Engine
 
-A backend service for turning messy, unstructured text — support tickets, inbound leads, contact-form submissions — into structured, actionable data. Drop in a raw message, and it comes back tagged with a category, priority, sentiment, and a suggested next action, ready to route to whatever system needs it.
+A backend service for turning messy, unstructured text (support tickets, inbound leads, contact-form submissions) into structured, actionable data. Drop in a raw message, and it comes back tagged with a category, priority, sentiment, and a suggested next action, ready to route to whatever system needs it.
 
 The point of building it this way was to keep the API responsive no matter how long the AI call takes. Ingestion returns immediately with a task ID; the actual classification work happens in the background and shows up a moment later when you check status (or get pushed to you via webhook).
 
@@ -8,10 +8,10 @@ The point of building it this way was to keep the API responsive no matter how l
 
 - **FastAPI** handles the ingest and status endpoints, async all the way down.
 - **Celery, backed by Redis**, does the actual work off the request thread. That's what lets `POST /ingest` come back in milliseconds with a `202` instead of making the caller wait on an LLM round trip.
-- **PostgreSQL**, via SQLAlchemy's async engine, is where request and agent-execution history lives — nothing in memory, nothing lost on a restart.
+- **PostgreSQL**, via SQLAlchemy's async engine, is where request and agent-execution history lives. Nothing in memory, nothing lost on a restart.
 - **OpenAI**, called in JSON mode and validated against a Pydantic schema before it ever touches the database. If the model returns something malformed, that request is marked failed with a reason instead of silently storing garbage.
 
-Each of these pieces only knows about its own job — the API layer doesn't know how classification works, the agent doesn't know about Celery, the worker doesn't know about FastAPI. That's mostly so any one of them can be swapped later without a rewrite (a different LLM provider, a different queue, whatever).
+Each of these pieces only knows about its own job: the API layer doesn't know how classification works, the agent doesn't know about Celery, the worker doesn't know about FastAPI. That's mostly so any one of them can be swapped later without a rewrite (a different LLM provider, a different queue, whatever).
 
 ## Getting it running
 
